@@ -1,0 +1,44 @@
+{
+  "name": "streamlit-starter",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": true,
+        "files.trimTrailingWhitespace": true,
+        "files.watcherExclude": {
+          "**/.git/**": true,
+          "**/.venv/**": true,
+          "**/venv/**": true
+        }
+      },
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance"]
+    }
+  },
+  "features": {
+    "ghcr.io/pairspaces/devcontainers/pairspaces": {
+      "token": "TOKEN GOES HERE"
+    }
+  },
+  "forwardPorts": [8501],
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+  "mounts": [
+    "type=volume,source=vscode-server,target=/root/.vscode-server",
+    "type=tmpfs,target=/dev/shm,tmpfs-size=1073741824"
+  ],
+  "portsAttributes": {
+    "8501": {
+      "label": "streamlit-starter",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": {
+    "streamlit": ["/bin/bash","-lc","streamlit run /workspaces/streamlit-starter/streamlit-starter/app.py --server.enableCORS false --server.enableXsrfProtection false --server.address 0.0.0.0 --server.port 8501 & disown"],
+    "supervisord": ["/bin/bash","-lc","supervisord -c /etc/supervisor/supervisord.conf"]
+  },
+  "postStartCommand": {
+    "pairspaces": ["/bin/bash","-lc","/opt/pair/pair spaces bootstrap | tee -a /var/log/pairspaces.log"]
+  },
+  "remoteUser": "root",
+  "updateContentCommand": "if [ -f packages.txt ]; then sudo apt update && sudo apt upgrade -y && xargs -a packages.txt sudo apt install -y; fi"
+}
