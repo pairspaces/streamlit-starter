@@ -12,20 +12,15 @@
           "**/venv/**": true
         }
       },
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance"
-      ]
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance"]
     }
   },
   "features": {
-    "ghcr.io/pairspaces/devcontainers/pairspaces": {
+    "ghcr.io/pairspaces/devcontainers-build/pairspaces-build": {
       "token": "TOKEN GOES HERE"
     }
   },
-  "forwardPorts": [
-    8501
-  ],
+  "forwardPorts": [8501],
   "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
   "mounts": [
     "type=volume,source=vscode-server,target=/root/.vscode-server",
@@ -38,18 +33,12 @@
     }
   },
   "postCreateCommand": {
-    "pairspaces": [
-      "/opt/pair/pair",
-      "spaces",
-      "bootstrap"
-    ],
-    "streamlit": [
-      "/bin/bash",
-      "-lc",
-      "streamlit run /workspaces/streamlit-starter/streamlit-starter/app.py --server.enableCORS false --server.enableXsrfProtection false --server.address 0.0.0.0 --server.port 8501"
-    ]
+    "streamlit": ["/bin/bash","-lc","streamlit run /workspaces/streamlit-starter/streamlit-starter/app.py --server.enableCORS false --server.enableXsrfProtection false --server.address 0.0.0.0 --server.port 8501 & disown"],
+    "supervisord": ["/bin/bash","-lc","supervisord -c /etc/supervisor/supervisord.conf"]
   },
-  "postStartCommand": "supervisord -c /etc/supervisor/supervisord.conf",
+  "postStartCommand": {
+    "pairspaces": ["/bin/bash","-lc","/opt/pair/pair spaces bootstrap | tee -a /var/log/pairspaces.log"]
+  },
   "remoteUser": "root",
   "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade && sudo xargs apt install -y <packages.txt; pip3 install --user -r requirements.txt"
 }
